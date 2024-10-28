@@ -1,0 +1,163 @@
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* This can stay, but we will make it full screen */
+    overflow: hidden; /* Prevent scrolling on the body */
+  }
+
+  .App {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full height of the viewport */
+    width: 100vw; /* Full width of the viewport */
+    background-color: #f4f7f6;
+  }
+
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%; /* Change to full width */
+    height: 100%; /* Change to full height */
+    max-width: 600px; /* Optional: limit max width */
+    max-height: 800px; /* Optional: limit max height */
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background-color: #f4f7f6;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .message {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
+  .sent {
+    align-items: flex-end;
+  }
+
+  .received {
+    align-items: flex-start;
+  }
+
+  .message-timestamp {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .message-content {
+    background-color: #0084ff;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 60%;
+    word-wrap: break-word;
+  }
+
+  .received .message-content {
+    background-color: #e5e5ea;
+    color: #000;
+  }
+
+  .chat-input {
+    padding: 16px;
+    display: flex;
+    border-top: 1px solid #ddd;
+    background-color: #fff;
+  }
+
+  .chat-input input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+  }
+
+  .chat-input button {
+    margin-left: 8px;
+    background-color: #0084ff;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .chat-input button:hover {
+    background-color: #006bbd;
+  }
+
+  .chat-messages::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-messages::-webkit-scrollbar-thumb {
+    background-color: #aaa;
+    border-radius: 3px;
+  }
+
+  .chat-messages::-webkit-scrollbar-track {
+    background-color: #f4f7f6;
+  }
+
+  .message-timestamp {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 4px;
+    /* Add padding or styling as necessary */
+  }
+  .message {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
+  .sent {
+    align-items: flex-end;
+  }
+
+  .received {
+    align-items: flex-start;
+  }
+
+  .sent .message-content {
+    background-color: #0084ff; /* Sender message background */
+    color: white; /* Sender message text color */
+  }
+
+  .received .message-content {
+    background-color: #e5e5ea; /* Receiver message background */
+    color: #000; /* Receiver message text color */
+  }
+
+  /* Add any additional styling for sent messages if necessary */
+  .sent .message-timestamp {
+    color: #999; /* Optional: change sender timestamp color */
+  }
+
+  .received .message-timestamp {
+    color: #999; /* Optional: change receiver timestamp color */
+  }
