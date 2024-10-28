@@ -31,6 +31,7 @@ sequelize.authenticate().then(() => {
 }).catch((err) => {
     console.error("Unable to connect to the database:", err);
 });
+const port = process.env.PORT || 4000;
 
 function createServer() {
     const httpServer = http.createServer((req, res) => {
@@ -91,7 +92,7 @@ function createServer() {
         });
     });
 
-    httpServer.listen(3005, () => console.log('Listening on port 3005'));
+    httpServer.listen(port, () => console.log('Listening on port 3005'));
 }
 
 function fetchMessages() {
