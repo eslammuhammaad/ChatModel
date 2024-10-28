@@ -33,6 +33,8 @@ function App() {
   const socket = useRef(null);
   const chatEndRef = useRef(null);
 
+  const socketUrl = import.meta.env.VITE_SOCKET_URL;
+
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const id = queryParams.get("applicant_id");
@@ -60,8 +62,7 @@ function App() {
   }, [location]);
 
   useEffect(() => {
-    socket.current = io("http://localhost:3005");
-
+    socket.current = io(socketUrl);
     if (applicantId) {
       socket.current.emit("join", applicantId);
       socket.current.on("message", (msg) => {
@@ -101,7 +102,7 @@ function App() {
   };
 
   const fetchMessages = () => {
-    fetch(`http://localhost:3005/messages?applicant_id=${applicantId}`)
+    fetch(`${socketUrl}/messages?applicant_id=${applicantId}`)
       .then((res) => res.json())
       .then((data) => setMessages(data));
   };
