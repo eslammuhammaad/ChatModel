@@ -1,19 +1,13 @@
-const WebSocket = require('websocket').server;
 const http = require('http');
 const cors = require('cors');
 const Sequelize = require('sequelize');
+const socketIo = require('socket.io');
 require('dotenv').config();
-
 
 const sequelize = new Sequelize(process.env.DATABASE_URL);
 
-
 const Message = sequelize.define('communications', {
-    id: {
-        type: Sequelize.DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
+    id: { type: Sequelize.DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     timestamp: Sequelize.DataTypes.STRING,
     status: Sequelize.DataTypes.STRING,
     activity_url: Sequelize.DataTypes.STRING,
@@ -27,10 +21,8 @@ const Message = sequelize.define('communications', {
     sender_type: Sequelize.DataTypes.STRING,
     sender_photo: Sequelize.DataTypes.STRING,
     sender_id: Sequelize.DataTypes.STRING,
-    date_timestamp: Sequelize.DataTypes.DATE
-}, {
-    timestamps: false
-});
+    date_timestamp: Sequelize.DataTypes.DATE,
+}, { timestamps: false });
 
 sequelize.authenticate().then(() => {
     console.log("Connection has been established successfully.");
@@ -41,7 +33,7 @@ sequelize.authenticate().then(() => {
 });
 
 function createServer() {
-    const httpServer = http.Server((req, res) => {
+    const httpServer = http.createServer((req, res) => {
         cors()(req, res, () => {
             if (req.url.startsWith('/messages')) {
                 const url = new URL(req.url, `http://${req.headers.host}`);
@@ -71,40 +63,31 @@ function createServer() {
         });
     });
 
-    const webSocketServer = new WebSocket({
-        httpServer: httpServer
+    const io = socketIo(httpServer, {
+        cors: {
+            origin: '*',
+            methods: ['GET', 'POST'],
+        },
     });
 
-    const clients = {};
+    io.on('connection', (socket) => {
+        console.log('A user connected.');
 
-    webSocketServer.on('request', (req) => {
-        const connection = req.accept(null, req.origin);
-        
-        connection.on('message', (message) => {
-            let msg = JSON.parse(message.utf8Data);
-
+        socket.on('message', (msg) => {
             if (msg.applicant_id) {
-                clients[msg.applicant_id] = clients[msg.applicant_id] || [];
-                clients[msg.applicant_id].push(connection);
-
                 Message.create(msg).then(() => {
-                    // Broadcast only to clients with the same applicant_id
-                    if (clients[msg.applicant_id]) {
-                        clients[msg.applicant_id].forEach((client) => {
-                            client.sendUTF(JSON.stringify(msg));
-                        });
-                    }
+                    io.to(`applicant_${msg.applicant_id}`).emit('message', msg);
                 });
             }
         });
 
-        connection.on('close', () => {
-            for (let id in clients) {
-                clients[id] = clients[id].filter((client) => client !== connection);
-                if (clients[id].length === 0) {
-                    delete clients[id];
-                }
-            }
+        socket.on('join', (applicantId) => {
+            socket.join(`applicant_${applicantId}`);
+            console.log(`User joined room applicant_${applicantId}`);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('A user disconnected.');
         });
     });
 
@@ -114,8 +97,7 @@ function createServer() {
 function fetchMessages() {
     return Message.findAll();
 }
+
 function fetchMessagesByApplicantId(applicantId) {
-    return Message.findAll({
-        where: { applicant_id: applicantId }
-    });
+    return Message.findAll({ where: { applicant_id: applicantId } });
 }

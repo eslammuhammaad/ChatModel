@@ -1,6 +1,7 @@
 import "./App.css";
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { io } from "socket.io-client";
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -47,7 +48,6 @@ function App() {
       setSenderPhoto(photo);
       setSenderId(sender_id);
 
-      // Update message state with user details
       setMessage((prevMessage) => ({
         ...prevMessage,
         applicant_id: id,
@@ -60,22 +60,19 @@ function App() {
   }, [location]);
 
   useEffect(() => {
-    socket.current = new WebSocket("ws://localhost:3005");
+    socket.current = io("http://localhost:3005");
 
-    socket.current.onopen = () => {
-      console.log("Connected successfully.");
-    };
-
-    socket.current.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-
-      if (msg.applicant_id === applicantId) {
-        setMessages((prevMessages) => [...prevMessages, msg]);
-      }
-    };
+    if (applicantId) {
+      socket.current.emit("join", applicantId);
+      socket.current.on("message", (msg) => {
+        if (msg.applicant_id === applicantId) {
+          setMessages((prevMessages) => [...prevMessages, msg]);
+        }
+      });
+    }
 
     return () => {
-      socket.current.close();
+      socket.current.disconnect();
     };
   }, [applicantId]);
 
@@ -94,13 +91,12 @@ function App() {
       date_timestamp: new Date().toISOString()
     }));
 
-    // Send the updated message
-    socket.current.send(JSON.stringify({
+    socket.current.emit("message", {
       ...message,
       message_content: messageInput,
       date_timestamp: new Date().toISOString()
-    }));
-    
+    });
+
     setMessageInput("");
   };
 
