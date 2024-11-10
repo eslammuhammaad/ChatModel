@@ -99,7 +99,6 @@ function App() {
       ...prevMessage,
       communication_type: communicationType,
     }));
-    console.log(message);
   }, [communicationType]);
 
   useEffect(() => {
@@ -114,10 +113,7 @@ function App() {
 
   const sendMessage = () => {
     if (messageInput.trim() === "") return;
-
-    // console.log(internal_name);
-    console.log(selectedInternals);
-
+    
     setMessage((prevMessage) => ({
       ...prevMessage,
       message_content: messageInput,
@@ -135,7 +131,7 @@ function App() {
       const messagePayload = {
         ...message,
         message_content: messageInput,
-        date_timestamp: new Date().getTimezoneOffset.toISOString(),
+        date_timestamp: new Date().toISOString(),
         selected_internals: selectedInternals
         ? selectedInternals.map((internal) => internal.value)
         : [],
