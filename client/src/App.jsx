@@ -236,16 +236,11 @@ function App() {
           <div ref={chatEndRef} />
         </div>
         <div className="chat-input">
-          <input
+          <textarea
             type="text"
             placeholder="Type your message"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && messageInput.trim() !== "") {
-                sendMessage();
-              }
-            }}
           />
           <button onClick={sendMessage}>Send</button>
         </div>
