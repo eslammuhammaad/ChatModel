@@ -32,7 +32,6 @@ const Message = sequelize.define(
   { timestamps: false }
 );
 
-// Define the Contacts model
 const Contact = sequelize.define(
   "contacts",
   {
@@ -47,6 +46,9 @@ const Contact = sequelize.define(
     email: Sequelize.DataTypes.STRING,
     user_id: Sequelize.DataTypes.STRING,
     full_name: Sequelize.DataTypes.STRING,
+    owner_id: Sequelize.DataTypes.STRING,
+    owner_name: Sequelize.DataTypes.STRING,
+    last_updated_timestamp: Sequelize.DataTypes.DATE,
   },
   { timestamps: false }
 );
@@ -56,17 +58,78 @@ sequelize
   .then(() => {
     console.log("Connection has been established successfully.");
     Message.sync();
+    Contact.sync();
     createServer();
   })
   .catch((err) => {
     console.error("Unable to connect to the database:", err);
   });
+
 const port = process.env.PORT || 4000;
 
 function createServer() {
   const httpServer = http.createServer((req, res) => {
     cors()(req, res, () => {
-      if (req.url.startsWith("/messages")) {
+      // Existing endpoint: /contacts/update-timestamp
+      if (
+        req.url.startsWith("/contacts/update-timestamp") &&
+        req.method === "POST"
+      ) {
+        let body = "";
+
+        req.on("data", (chunk) => {
+          body += chunk.toString();
+        });
+
+        req.on("end", () => {
+          const { contactId } = JSON.parse(body);
+
+          if (!contactId) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "contactId is required" }));
+            return;
+          }
+
+          updateContactTimestamp(contactId)
+            .then(() => {
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.end(
+                JSON.stringify({ message: "Timestamp updated successfully" })
+              );
+            })
+            .catch((err) => {
+              res.writeHead(500);
+              res.end(JSON.stringify({ error: err.message }));
+            });
+        });
+      } 
+      // New endpoint: /contacts/:id
+      else if (req.url.startsWith("/contact/")) {
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const contactId = url.pathname.split("/")[2]; // Extract contactId from URL
+
+        if (contactId) {
+          fetchContactById(contactId)
+            .then((contact) => {
+              if (!contact) {
+                res.writeHead(404, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ error: "Contact not found" }));
+              } else {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.end(JSON.stringify(contact));
+              }
+            })
+            .catch((err) => {
+              res.writeHead(500);
+              res.end(JSON.stringify({ error: err.message }));
+            });
+        } else {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "contactId is required" }));
+        }
+      } 
+      // Existing endpoint: /messages
+      else if (req.url.startsWith("/messages")) {
         const url = new URL(req.url, `http://${req.headers.host}`);
         const applicantId = url.searchParams.get("applicant_id");
 
@@ -91,7 +154,9 @@ function createServer() {
               res.end(JSON.stringify({ error: err.message }));
             });
         }
-      } else if (req.url.startsWith("/contacts/internal")) {
+      } 
+      // Existing endpoint: /contacts/internal
+      else if (req.url.startsWith("/contacts/internal")) {
         fetchInternalContacts()
           .then((contacts) => {
             res.writeHead(200, { "Content-Type": "application/json" });
@@ -101,7 +166,9 @@ function createServer() {
             res.writeHead(500);
             res.end(JSON.stringify({ error: err.message }));
           });
-      } else {
+      } 
+      // Fallback for undefined routes
+      else {
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "Not Found" }));
       }
@@ -136,17 +203,35 @@ function createServer() {
     });
   });
 
-  httpServer.listen(port, () => console.log("Listening on port 3005"));
+  httpServer.listen(port, () => console.log(`Listening on port ${port}`));
 }
 
+// Function to fetch all messages
 function fetchMessages() {
   return Message.findAll();
 }
 
+// Function to fetch messages by applicantId
 function fetchMessagesByApplicantId(applicantId) {
-  return Message.findAll({ where: { applicant_id: applicantId } });
+  return Message.findAll({ where: { applicant_id: applicantId },  order: [['id', 'ASC']],});
 }
 
+// Function to fetch internal contacts
 function fetchInternalContacts() {
-  return Contact.findAll({ where: { contact_type: "Internal",lead_status : "Active" } });
+  return Contact.findAll({
+    where: { contact_type: "Internal", lead_status: "Active" },
+  });
+}
+
+// Function to fetch a contact by id
+function fetchContactById(contactId) {
+  return Contact.findOne({ where: { id: contactId } });
+}
+
+// Function to update contact timestamp
+function updateContactTimestamp(contactId) {
+  return Contact.update(
+    { last_updated_timestamp: new Date().toISOString() },
+    { where: { id: contactId } }
+  );
 }
