@@ -57,6 +57,7 @@
 
   .received {
     align-items: flex-start;
+    
   }
 
   .message-timestamp {
@@ -72,11 +73,13 @@
     border-radius: 15px;
     max-width: 60%;
     word-wrap: break-word;
+    
   }
 
   .received .message-content {
     background-color: #e5e5ea;
     color: #000;
+    margin-left: 20px ;
   }
 
   .chat-input {
@@ -146,6 +149,7 @@
   .sent .message-content {
     background-color: #0084ff; /* Sender message background */
     color: white; /* Sender message text color */
+    margin-right: 20px ;
   }
 
   .received .message-content {
@@ -204,6 +208,7 @@
   
   .react-select-container {
     width: 60%; 
+    display: flex;
   }
   
   .error-message {
@@ -253,7 +258,7 @@
   
   .message-content.lead {
     background-color: green;
-    color: white; /* Ensure text is readable on a green background */
+    color: white;
   }
   
 .sender_photo{
@@ -261,4 +266,11 @@
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.mention{
+  color: black;
+  margin-top: 0.5rem;
+  margin-left: 2rem;
+  margin-right: 0.5rem;
 }

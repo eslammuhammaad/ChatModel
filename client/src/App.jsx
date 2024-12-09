@@ -232,7 +232,7 @@ function App() {
     fetch(`${socketUrl}/contacts/internal`)
       .then((res) => res.json())
       .then((data) => setInternals(data));
-  }
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -246,7 +246,7 @@ function App() {
   return (
     <div className="App">
       <div className="chat-container">
-        {contactType === "Internal" && (
+        {(contactType === "Internal" || contactType === "Partner") && (
           <div className="dropdown-container">
             <div>
               <select
@@ -256,23 +256,27 @@ function App() {
               >
                 <option value="">Select type of communication</option>
                 <option value="Lead Communication">Lead Communication</option>
-                <option value="Internal Communication">
-                  Internal Communication
+                <option value={contactType === "Internal"?"Internal Communication":"Partner Communication"}>
+                  {contactType === "Internal"?"Internal Communication":"Partner Communication"}
                 </option>
               </select>
             </div>
-            <div className="react-select-container">
-              <Select
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                defaultValue={selectedInternals}
-                isMulti
-                options={internal_name}
-                onChange={(selectedOptions) =>
-                  setSelectedInternals(selectedOptions)
-                }
-              />
-            </div>
+            {/* <label className="mention">Mention</label> */}
+            {contactType === "Internal" && (
+              <div className="react-select-container">
+                <label className="mention">Mention</label>
+                <Select
+                  closeMenuOnSelect={false}
+                  components={animatedComponents}
+                  defaultValue={selectedInternals}
+                  isMulti
+                  options={internal_name}
+                  onChange={(selectedOptions) =>
+                    setSelectedInternals(selectedOptions)
+                  }
+                />
+              </div>
+            )}
           </div>
         )}
         {errorMessage && (
@@ -303,7 +307,20 @@ function App() {
                     : ""}
                 </span>
                 <div>
-                  {message.sender_id === senderId?"":<img src={message.sender_photo} alt="Description of image" className="sender_photo"/>}
+                  {message.sender_id === senderId ? (
+                    ""
+                  ) : (
+                    <img
+                      src={
+                        message.sender_photo == null ||
+                        message.sender_photo == ""
+                          ? "https://res.cloudinary.com/frontly/image/upload/h_100/q_60/f_jpg/v1715311985/user_avatar_uul0ak.png"
+                          : message.sender_photo
+                      }
+                      alt=""
+                      className="sender_photo"
+                    />
+                  )}
                   <span
                     className={`message-content ${
                       contactType === "Internal" &&
@@ -314,7 +331,20 @@ function App() {
                   >
                     {message.message_content}
                   </span>
-                  {message.sender_id === senderId?<img src={message.sender_photo} alt="Description of image" className="sender_photo"/>:""}
+                  {message.sender_id === senderId ? (
+                    <img
+                      src={
+                        message.sender_photo == null ||
+                        message.sender_photo == ""
+                          ? "https://res.cloudinary.com/frontly/image/upload/h_100/q_60/f_jpg/v1715311985/user_avatar_uul0ak.png"
+                          : message.sender_photo
+                      }
+                      alt=""
+                      className="sender_photo"
+                    />
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
             ))}
@@ -335,4 +365,3 @@ function App() {
 }
 
 export default App;
-
