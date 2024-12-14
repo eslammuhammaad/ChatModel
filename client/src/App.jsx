@@ -242,7 +242,6 @@ function App() {
     const date = new Date(timestamp);
     return date.toLocaleString();
   };
-  console.log(selectedInternals);
   return (
     <div className="App">
       <div className="chat-container">
@@ -299,12 +298,12 @@ function App() {
                 } `}
               >
                 <span className="message-timestamp">
-                  {message.sender_fullname} -{" "}
+                  {message.sender_fullname==""?(message.sender_type=="Lead"?contact.full_name:""):message.sender_fullname} -{" "}
                   {formatDate(message.date_timestamp)}
                   {contactType === "Internal" &&
-                  message.communication_type === "Lead Communication"
+                  message.communication_type === "Lead Communication" || message.communication_type === "Lead"
                     ? " - Lead Communication"
-                    : ""}
+                    : " - Internal Communication"}
                 </span>
                 <div>
                   {message.sender_id === senderId ? (
