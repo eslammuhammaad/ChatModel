@@ -163,7 +163,7 @@ function App() {
     // Construct message object for WebSocket and webhook
     const newMessage = {
       ...message,
-      message_content: messageInput,
+      message_content: messageInput +" l " +selectedInternals.map((internal) => internal.value),
       date_timestamp: new Date().toISOString(),
     };
 
@@ -300,10 +300,10 @@ function App() {
                 <span className="message-timestamp">
                   {message.sender_fullname==""?(message.sender_type=="Lead"?contact.full_name:""):message.sender_fullname} -{" "}
                   {formatDate(message.date_timestamp)}
-                  {contactType === "Internal" &&
-                  message.communication_type === "Lead Communication" || message.communication_type === "Lead"
+                  {contactType !== "Lead" ?
+                  ((message.communication_type === "Lead Communication" || message.communication_type === "Lead")
                     ? " - Lead Communication"
-                    : " - Internal Communication"}
+                    : " - Internal Communication"):""}
                 </span>
                 <div>
                   {message.sender_id === senderId ? (
@@ -328,7 +328,8 @@ function App() {
                         : ""
                     }`}
                   >
-                    {message.message_content}
+                    {message.message_content.split(/ l /)[0]}
+                
                   </span>
                   {message.sender_id === senderId ? (
                     <img
@@ -345,7 +346,10 @@ function App() {
                     ""
                   )}
                 </div>
+                {contactType!="Lead"?<span className="show-mention">mentioned: {message.message_content.split(/ l /)[1] +","}</span>:""}
+
               </div>
+              
             ))}
           <div ref={chatEndRef} />
         </div>
