@@ -304,6 +304,7 @@ function App() {
                   ((message.communication_type === "Lead Communication" || message.communication_type === "Lead")
                     ? " - Lead Communication"
                     : " - Internal Communication"):""}
+
                 </span>
                 <div>
                   {message.sender_id === senderId ? (
@@ -329,6 +330,7 @@ function App() {
                     }`}
                   >
                     {message.message_content.split(/ l /)[0]}
+                    {message.sender_id === senderId?<span className="message_mark">{message.status==="sent"?"\u2714":""}</span>:""}
                 
                   </span>
                   {message.sender_id === senderId ? (
